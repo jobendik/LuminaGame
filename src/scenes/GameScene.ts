@@ -41,7 +41,7 @@ import { Trigger } from '../entities/Trigger';
 import { REGIONS } from '../data/regions';
 import { SaveSystem, SaveData } from '../systems/SaveSystem';
 
-const WORLD_WIDTH = 3840;
+const WORLD_WIDTH = 11520;
 const WORLD_HEIGHT = 720;
 const REGION_COUNT = REGIONS.length;
 const REGION_WIDTH = WORLD_WIDTH / REGION_COUNT;
@@ -102,6 +102,7 @@ export class GameScene extends Phaser.Scene {
   private spiritModeLabel: Phaser.GameObjects.Text | null = null;
   private holdProgressRing: Phaser.GameObjects.Graphics | null = null;
   private benchHoldRing: Phaser.GameObjects.Graphics | null = null;
+  private abilityTutorialContainer: Phaser.GameObjects.Container | null = null;
   private mKey!: Phaser.Input.Keyboard.Key;
 
   constructor() {
@@ -138,72 +139,78 @@ export class GameScene extends Phaser.Scene {
     // --- Platforms ---
     const platforms = createPlatforms(this, ASSET_KEYS.PLATFORM, [
       // Ground floor
-      { x: WORLD_WIDTH / 2, y: WORLD_HEIGHT - 16, scaleX: 30, scaleY: 1 },
+      { x: WORLD_WIDTH / 2, y: WORLD_HEIGHT - 16, scaleX: 90, scaleY: 1 },
 
-      // Section 1 → fragment 1 (x:500, y:470)
-      { x: 350, y: 570 },
-      { x: 550, y: 470 },
+      // Silent Plains (0–2304) — gentle intro
+      { x: 700, y: 570 },
+      { x: 1120, y: 470 },
+      { x: 1600, y: 540 },
+      { x: 2000, y: 440 },
 
-      // Section 2 → fragment 2 (x:850, y:390)
-      { x: 750, y: 540 },
-      { x: 900, y: 410 },
+      // Echo Forest (2304–4608) — moderate platforming
+      { x: 2500, y: 560 },
+      { x: 2900, y: 450 },
+      { x: 3400, y: 530 },
+      { x: 3900, y: 420 },
+      { x: 4300, y: 370 },
 
-      // Section 3 → fragment 3 (x:1450, y:370)
-      { x: 1200, y: 560 },
-      { x: 1350, y: 430 },
-      { x: 1500, y: 370 },
+      // Sunken Ruins (4608–6912) — water region, wider landings
+      { x: 4900, y: 550 },
+      { x: 5300, y: 440 },
+      { x: 5800, y: 370 },
+      { x: 6200, y: 500 },
+      { x: 6600, y: 410 },
 
-      // Section 4 → fragment 4 (x:2050, y:330)
-      { x: 1850, y: 550 },
-      { x: 1970, y: 420 },
-      { x: 2100, y: 340 },
+      // Sky Fracture (6912–9216) — wind-boosted jumps
+      { x: 7100, y: 560 },
+      { x: 7500, y: 440 },
+      { x: 7900, y: 350 },
+      { x: 8400, y: 500 },
+      { x: 8800, y: 380 },
 
-      // Section 5 → fragment 5 (x:2650, y:300)
-      { x: 2400, y: 560 },
-      { x: 2530, y: 430 },
-      { x: 2660, y: 320 },
-
-      // Section 6 → fragment 6 (x:3250, y:410)
-      { x: 3100, y: 550 },
-      { x: 3250, y: 420 },
+      // Core Veil (9216–11520) — final stretch
+      { x: 9400, y: 550 },
+      { x: 9800, y: 430 },
+      { x: 10200, y: 340 },
+      { x: 10700, y: 480 },
     ]);
 
     // --- Moving Platforms ---
     const movingPlatConfigs: MovingPlatformConfig[] = [
       // Horizontal oscillating — shortcuts between sections
-      { x: 1050, y: 480, type: 'oscillating', axis: 'horizontal', distance: 160, speed: 50 },
-      { x: 2250, y: 460, type: 'oscillating', axis: 'horizontal', distance: 140, speed: 55 },
+      { x: 3100, y: 480, type: 'oscillating', axis: 'horizontal', distance: 320, speed: 55 },
+      { x: 6800, y: 460, type: 'oscillating', axis: 'horizontal', distance: 300, speed: 60 },
       // Vertical oscillating — reach high fragments
-      { x: 1680, y: 420, type: 'oscillating', axis: 'vertical', distance: 120, speed: 40 },
-      { x: 2900, y: 400, type: 'oscillating', axis: 'vertical', distance: 100, speed: 45 },
+      { x: 5000, y: 420, type: 'oscillating', axis: 'vertical', distance: 240, speed: 45 },
+      { x: 8800, y: 400, type: 'oscillating', axis: 'vertical', distance: 220, speed: 50 },
       // Crumbling — risk/reward
-      { x: 1100, y: 380, type: 'crumbling' },
-      { x: 2050, y: 360, type: 'crumbling' },
-      { x: 2800, y: 350, type: 'crumbling' },
+      { x: 3400, y: 380, type: 'crumbling' },
+      { x: 6200, y: 360, type: 'crumbling' },
+      { x: 8500, y: 350, type: 'crumbling' },
     ];
     this.movingPlatforms = movingPlatConfigs.map((cfg) => new MovingPlatform(this, cfg));
 
     // --- Wind Zones ---
     const windConfigs: WindZoneConfig[] = [
-      { x: 1400, y: WORLD_HEIGHT - 200, width: 250, height: 400, strength: 300 },
-      { x: 2600, y: WORLD_HEIGHT - 200, width: 200, height: 400, strength: -350 },
-      { x: 3200, y: WORLD_HEIGHT - 250, width: 180, height: 500, strength: 280 },
+      { x: 7200, y: WORLD_HEIGHT - 200, width: 500, height: 400, strength: 300 },
+      { x: 8000, y: WORLD_HEIGHT - 200, width: 400, height: 400, strength: -350 },
+      { x: 9600, y: WORLD_HEIGHT - 250, width: 360, height: 500, strength: 280 },
     ];
     this.windZones = windConfigs.map((cfg) => new WindZone(this, cfg));
 
     // --- Hidden Platforms (Spirit Vision reveals) ---
     const hiddenPlatConfigs: HiddenPlatformConfig[] = [
-      { x: 950, y: 340 },
-      { x: 1550, y: 300 },
-      { x: 2350, y: 280 },
-      { x: 3050, y: 320 },
+      { x: 1800, y: 340 },
+      { x: 4400, y: 300 },
+      { x: 7200, y: 280 },
+      { x: 9400, y: 320 },
     ];
     this.hiddenPlatforms = hiddenPlatConfigs.map((cfg) => new HiddenPlatform(this, cfg));
 
     // --- Water Pools (Sunken Ruins region) ---
     const waterPoolConfigs = [
-      { x: 1700, y: WORLD_HEIGHT - 100, width: 200, height: 200 },
-      { x: 2100, y: WORLD_HEIGHT - 120, width: 180, height: 240 },
+      { x: 5200, y: WORLD_HEIGHT - 100, width: 400, height: 200 },
+      { x: 6400, y: WORLD_HEIGHT - 120, width: 360, height: 240 },
     ];
     for (const wp of waterPoolConfigs) {
       const zone = this.add.zone(wp.x, wp.y, wp.width, wp.height);
@@ -235,7 +242,7 @@ export class GameScene extends Phaser.Scene {
 
     // --- Player ---
     this.playerSystem = new PlayerSystem(this, this.abilitySystem);
-    const player = this.playerSystem.create(200, WORLD_HEIGHT - 100);
+    const player = this.playerSystem.create(400, WORLD_HEIGHT - 100);
 
     // --- Memory Fragments ---
     this.createMemoryFragments(player);
@@ -287,10 +294,10 @@ export class GameScene extends Phaser.Scene {
     this.checkpointSystem = new CheckpointSystem(this);
     this.checkpointSystem.setPlayer(player);
     this.checkpointSystem.create([
-      { x: 200, y: WORLD_HEIGHT - 32, id: 'cp-start' },
-      { x: 1200, y: WORLD_HEIGHT - 32, id: 'cp-mid1' },
-      { x: 2400, y: WORLD_HEIGHT - 32, id: 'cp-mid2' },
-      { x: 3400, y: WORLD_HEIGHT - 32, id: 'cp-end' },
+      { x: 400, y: WORLD_HEIGHT - 32, id: 'cp-start' },
+      { x: 3200, y: WORLD_HEIGHT - 32, id: 'cp-mid1' },
+      { x: 7200, y: WORLD_HEIGHT - 32, id: 'cp-mid2' },
+      { x: 9800, y: WORLD_HEIGHT - 32, id: 'cp-end' },
     ]);
 
     // --- Combat ---
@@ -303,15 +310,19 @@ export class GameScene extends Phaser.Scene {
     // --- Hazards (thorn clusters) ---
     this.hazards = this.physics.add.staticGroup();
     const hazardPositions = [
-      { x: 650, y: WORLD_HEIGHT - 24, scaleX: 3 },
-      { x: 1700, y: WORLD_HEIGHT - 24, scaleX: 3.5 },
-      { x: 2900, y: WORLD_HEIGHT - 24, scaleX: 2.5 },
+      { x: 2200, y: WORLD_HEIGHT - 16, count: 3, spacing: 22 },
+      { x: 6000, y: WORLD_HEIGHT - 16, count: 4, spacing: 22 },
+      { x: 9000, y: WORLD_HEIGHT - 16, count: 3, spacing: 22 },
     ];
     for (const h of hazardPositions) {
-      const thorn = this.hazards.create(h.x, h.y, ASSET_KEYS.HAZARD_THORN) as Phaser.Physics.Arcade.Sprite;
-      thorn.setScale(h.scaleX, 1);
-      thorn.setDepth(2);
-      thorn.refreshBody();
+      const totalWidth = (h.count - 1) * h.spacing;
+      for (let i = 0; i < h.count; i++) {
+        const thornX = h.x - totalWidth / 2 + i * h.spacing;
+        const thorn = this.hazards.create(thornX, h.y, ASSET_KEYS.HAZARD_THORN) as Phaser.Physics.Arcade.Sprite;
+        thorn.setOrigin(0.5, 1);
+        thorn.setDepth(2);
+        thorn.refreshBody();
+      }
     }
     this.physics.add.overlap(player, this.hazards, () => {
       this.combatSystem.damagePlayer(1, player.x, player.y + 10, 'Pierced by thorns');
@@ -319,10 +330,10 @@ export class GameScene extends Phaser.Scene {
 
     // --- Wraith Enemies ---
     const wraithConfigs: WraithConfig[] = [
-      { x1: 800, x2: 1100, y: WORLD_HEIGHT - 120, speed: 0.0016, aggroRadius: 260 },
-      { x1: 1600, x2: 1900, y: WORLD_HEIGHT - 140, speed: 0.0018, aggroRadius: 300 },
-      { x1: 2500, x2: 2850, y: WORLD_HEIGHT - 110, speed: 0.0014, aggroRadius: 340 },
-      { x1: 3100, x2: 3400, y: WORLD_HEIGHT - 130, speed: 0.0015, aggroRadius: 280 },
+      { x1: 2400, x2: 3000, y: WORLD_HEIGHT - 120, speed: 0.0016, aggroRadius: 180 },
+      { x1: 5600, x2: 6200, y: WORLD_HEIGHT - 140, speed: 0.0018, aggroRadius: 180 },
+      { x1: 7600, x2: 8200, y: WORLD_HEIGHT - 110, speed: 0.0014, aggroRadius: 180 },
+      { x1: 10300, x2: 10800, y: WORLD_HEIGHT - 130, speed: 0.0015, aggroRadius: 180 },
     ];
     this.wraiths = wraithConfigs.map((cfg, i) => {
       const wraith = new Enemy(this, cfg, i);
@@ -345,11 +356,11 @@ export class GameScene extends Phaser.Scene {
 
     // --- Crawler Enemies (ground patrol) ---
     const crawlerConfigs: CrawlerConfig[] = [
-      { x: 500, y: WORLD_HEIGHT - 48, patrolLeft: 400, patrolRight: 700 },
-      { x: 1400, y: WORLD_HEIGHT - 48, patrolLeft: 1300, patrolRight: 1600 },
-      { x: 2200, y: WORLD_HEIGHT - 48, patrolLeft: 2100, patrolRight: 2450 },
-      { x: 3000, y: WORLD_HEIGHT - 48, patrolLeft: 2900, patrolRight: 3200 },
-      { x: 3500, y: WORLD_HEIGHT - 48, patrolLeft: 3350, patrolRight: 3650 },
+      { x: 1400, y: WORLD_HEIGHT - 48, patrolLeft: 1200, patrolRight: 1800 },
+      { x: 3600, y: WORLD_HEIGHT - 48, patrolLeft: 3400, patrolRight: 4000 },
+      { x: 6400, y: WORLD_HEIGHT - 48, patrolLeft: 6200, patrolRight: 6800 },
+      { x: 8600, y: WORLD_HEIGHT - 48, patrolLeft: 8400, patrolRight: 9000 },
+      { x: 10800, y: WORLD_HEIGHT - 48, patrolLeft: 10600, patrolRight: 11100 },
     ];
     this.crawlers = crawlerConfigs.map((cfg) => {
       const crawler = new Crawler(this, cfg);
@@ -451,21 +462,21 @@ export class GameScene extends Phaser.Scene {
 
     // --- Beacons ---
     const beaconConfigs: BeaconConfig[] = [
-      { x: 1100, y: WORLD_HEIGHT - 32, label: 'Western Beacon' },
-      { x: 2700, y: WORLD_HEIGHT - 32, label: 'Eastern Beacon' },
+      { x: 3200, y: WORLD_HEIGHT - 32, label: 'Western Beacon' },
+      { x: 7000, y: WORLD_HEIGHT - 32, label: 'Eastern Beacon' },
     ];
     this.beacons = beaconConfigs.map((cfg, i) => new Beacon(this, cfg, i));
 
     // --- Rest Benches ---
     const benchConfigs: BenchConfig[] = [
-      { x: 600, y: WORLD_HEIGHT - 32 },
-      { x: 1800, y: WORLD_HEIGHT - 32 },
-      { x: 3100, y: WORLD_HEIGHT - 32 },
+      { x: 900, y: WORLD_HEIGHT - 32 },
+      { x: 5200, y: WORLD_HEIGHT - 32 },
+      { x: 9300, y: WORLD_HEIGHT - 32 },
     ];
     this.benches = benchConfigs.map((cfg) => new RestBench(this, cfg));
 
     // --- Boss Door (progression gate) ---
-    this.bossDoor = new BossDoor(this, { x: 3400, y: WORLD_HEIGHT - 32, killsRequired: 3 });
+    this.bossDoor = new BossDoor(this, { x: 10400, y: WORLD_HEIGHT - 32, killsRequired: 3 });
     this.physics.add.collider(player, this.bossDoor.getZone());
 
     // --- Events ---
@@ -783,7 +794,7 @@ export class GameScene extends Phaser.Scene {
     // --- Audio (start ambient music) ---
     // Browsers require user interaction before audio can play.
     // The main menu keypress counts as interaction, so this should work.
-    this.audioSystem.playTrack(ASSET_KEYS.MUSIC_AMBIENT);
+    this.audioSystem.playTrack(ASSET_KEYS.MUSIC_LEVEL1);
 
     // --- Debug toggle (F12) ---
     this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.F12).on('down', () => {
@@ -1248,9 +1259,10 @@ export class GameScene extends Phaser.Scene {
       if (this.dialogueSystem.isOpen) {
         this.dialogueSystem.advance();
       } else if (this.nearestNpc) {
+        this.combatSystem.setInvincible(true);
         this.dialogueSystem.open(
           this.nearestNpc.getCurrentLines(),
-          undefined,
+          () => { this.combatSystem.setInvincible(false); },
           this.nearestNpc.colors,
           this.nearestNpc.portraitKey,
         );
@@ -1508,12 +1520,12 @@ export class GameScene extends Phaser.Scene {
 
   private createMemoryFragments(player: Phaser.Physics.Arcade.Sprite): void {
     const fragmentPositions = [
-      { x: 500, y: 420, id: 'fragment-1' },
-      { x: 850, y: 360, id: 'fragment-2' },
-      { x: 1450, y: 320, id: 'fragment-3' },
-      { x: 2050, y: 290, id: 'fragment-4' },
-      { x: 2650, y: 270, id: 'fragment-5' },
-      { x: 3250, y: 370, id: 'fragment-6' },
+      { x: 1120, y: 420, id: 'fragment-1' },
+      { x: 2900, y: 400, id: 'fragment-2' },
+      { x: 5300, y: 390, id: 'fragment-3' },
+      { x: 7500, y: 390, id: 'fragment-4' },
+      { x: 8800, y: 330, id: 'fragment-5' },
+      { x: 10200, y: 290, id: 'fragment-6' },
     ];
 
     for (const pos of fragmentPositions) {
@@ -1582,7 +1594,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     // Restore ability unlocks based on collected fragment count
-    this.checkAbilityUnlocks();
+    this.checkAbilityUnlocks(false);
   }
 
   private updateRegionMusic(): void {
@@ -1602,7 +1614,7 @@ export class GameScene extends Phaser.Scene {
       if (this.cache.audio.exists(soundscapeKey)) {
         this.audioSystem.playTrack(soundscapeKey, { volume: 0.3 });
       } else {
-        this.audioSystem.playTrack(ASSET_KEYS.MUSIC_AMBIENT, { volume: 0.35 });
+        this.audioSystem.playTrack(ASSET_KEYS.MUSIC_LEVEL1, { volume: 0.35 });
       }
 
       // Apply region mechanic modifiers
@@ -1721,18 +1733,24 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
-  private checkAbilityUnlocks(): void {
+  private checkAbilityUnlocks(showFeedback = true): void {
     const unlockMap: { count: number; ability: AbilityId; name: string; key: string; desc: string }[] = [
       { count: 1, ability: AbilityId.DASH, name: 'Dash', key: 'Shift', desc: 'Quick burst of speed with invincibility frames' },
       { count: 2, ability: AbilityId.GLIDE, name: 'Glide', key: 'Space (hold)', desc: 'Slow your fall and drift through the air' },
       { count: 3, ability: AbilityId.HEAVY_FORM, name: 'Heavy Form', key: 'H', desc: 'Resist wind gusts and increase ground impact' },
       { count: 4, ability: AbilityId.SPIRIT_VISION, name: 'Spirit Vision', key: 'V', desc: 'Reveal hidden platforms and secret paths' },
     ];
+    let queuedTutorials = 0;
 
     for (const entry of unlockMap) {
       if (this.collectedCount >= entry.count && !this.abilitySystem.isUnlocked(entry.ability)) {
         this.abilitySystem.unlock(entry.ability);
-        this.time.delayedCall(600, () => {
+        if (!showFeedback) {
+          continue;
+        }
+        const delay = 600 + queuedTutorials * 4700;
+        queuedTutorials++;
+        this.time.delayedCall(delay, () => {
           this.toastSystem.show(`Ability unlocked: ${entry.name}`, '#ffe080');
           this.cameraSystem.zoomPulse(0.03, 400);
           this.audioSystem.playSFX('sfx-checkpoint', 0.4);
@@ -1750,33 +1768,45 @@ export class GameScene extends Phaser.Scene {
     const cx = GAME_WIDTH / 2;
     const cy = GAME_HEIGHT / 2 + 80;
 
-    const bg = this.add.rectangle(cx, cy, 420, 90, 0x0a1230, 0.9);
-    bg.setScrollFactor(0).setDepth(250);
+    this.abilityTutorialContainer?.destroy();
+
+    const container = this.add.container(cx, cy);
+    container.setScrollFactor(0).setDepth(250);
+
+    const bg = this.add.rectangle(0, 0, 460, 108, 0x0a1230, 0.9);
     bg.setStrokeStyle(1.5, 0xffe080, 0.3);
 
-    const title = this.add.text(cx, cy - 22, `${name}  [ ${key} ]`, {
+    const title = this.add.text(0, -24, `${name}  [ ${key} ]`, {
       fontFamily: 'Georgia, serif',
       fontSize: '22px',
       color: '#ffe080',
-    }).setOrigin(0.5).setScrollFactor(0).setDepth(251);
+    }).setOrigin(0.5);
 
-    const body = this.add.text(cx, cy + 14, desc, {
+    const body = this.add.text(0, 18, desc, {
       fontFamily: 'Georgia, serif',
       fontSize: '14px',
       color: '#c0d0e0',
-    }).setOrigin(0.5).setScrollFactor(0).setDepth(251);
+      align: 'center',
+      wordWrap: { width: 380 },
+    }).setOrigin(0.5);
 
-    const items = [bg, title, body];
-    items.forEach(obj => obj.setAlpha(0));
+    container.add([bg, title, body]);
+    container.setAlpha(0);
+    this.abilityTutorialContainer = container;
 
     this.tweens.add({
-      targets: items,
+      targets: container,
       alpha: 1,
       duration: 400,
       hold: 4000,
       yoyo: true,
       ease: 'Sine.easeInOut',
-      onComplete: () => items.forEach(obj => obj.destroy()),
+      onComplete: () => {
+        if (this.abilityTutorialContainer === container) {
+          this.abilityTutorialContainer = null;
+        }
+        container.destroy();
+      },
     });
   }
 

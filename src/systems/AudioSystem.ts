@@ -75,9 +75,19 @@ export class AudioSystem {
   }
 
   playSFX(key: string, volume = 0.3): void {
-    if (this.scene.cache.audio.exists(key)) {
-      this.scene.sound.play(key, { volume: volume * SettingsManager.effectiveSfxVolume });
+    if (!this.scene.cache.audio.exists(key)) return;
+
+    // Ensure WebAudio context is running (may be suspended by browser policy)
+    const ctx = (this.scene.sound as Phaser.Sound.WebAudioSoundManager).context;
+    if (ctx && ctx.state === 'suspended') {
+      ctx.resume();
     }
+
+    const sfx = this.scene.sound.add(key, {
+      volume: volume * SettingsManager.effectiveSfxVolume,
+    });
+    sfx.play();
+    sfx.once('complete', () => sfx.destroy());
   }
 
   /** Play SFX with echo (delayed quiet repeat) — used in Echo Forest region */

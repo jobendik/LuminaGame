@@ -11,7 +11,7 @@ const config: Phaser.Types.Core.GameConfig = {
   width: GAME_WIDTH,
   height: GAME_HEIGHT,
   parent: 'game-container',
-  backgroundColor: COLORS.BACKGROUND,
+  backgroundColor: '#060c1a',
   physics: {
     default: 'arcade',
     arcade: {
@@ -21,9 +21,13 @@ const config: Phaser.Types.Core.GameConfig = {
   },
   pixelArt: false,
   roundPixels: true,
+  dom: {
+    createContainer: true,
+  },
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
+    expandParent: true,
   },
   scene: [BootScene, MainMenuScene, GameScene, DawnScene, UIScene],
 };

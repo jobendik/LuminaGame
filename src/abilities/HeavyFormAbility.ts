@@ -8,7 +8,7 @@ export class HeavyFormAbility extends BaseAbility {
 
   onActivate(player: Phaser.Physics.Arcade.Sprite): void {
     const body = player.body as Phaser.Physics.Arcade.Body;
-    body.setGravityY(400);
+    body.setGravityY(250);
     player.setTint(0x666688);
   }
 

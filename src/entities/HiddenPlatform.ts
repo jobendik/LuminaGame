@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { ASSET_KEYS } from '../config';
+import { ASSET_KEYS, WORLD_RENDER } from '../config';
 
 export interface HiddenPlatformConfig {
   x: number;
@@ -11,14 +11,21 @@ export class HiddenPlatform extends Phaser.Physics.Arcade.Sprite {
   private revealed = false;
 
   constructor(scene: Phaser.Scene, config: HiddenPlatformConfig) {
-    super(scene, config.x, config.y, ASSET_KEYS.PLATFORM);
+    const textureKey = scene.textures.exists(WORLD_RENDER.PLATFORM.REAL_TEXTURE_KEY)
+      ? WORLD_RENDER.PLATFORM.REAL_TEXTURE_KEY
+      : ASSET_KEYS.PLATFORM;
+    super(scene, config.x, config.y, textureKey);
     scene.add.existing(this);
     scene.physics.add.existing(this, true);
 
-    this.setScale(config.scaleX ?? 1, 1);
+    this.setDisplaySize(
+      WORLD_RENDER.PLATFORM.WIDTH * (config.scaleX ?? 1),
+      WORLD_RENDER.PLATFORM.HEIGHT,
+    );
     this.setDepth(2);
     this.setAlpha(0);
     this.setTint(0x88ccff);
+    (this.body as Phaser.Physics.Arcade.StaticBody).updateFromGameObject();
 
     // Start with collisions disabled
     (this.body as Phaser.Physics.Arcade.StaticBody).enable = false;

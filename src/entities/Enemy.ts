@@ -295,7 +295,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     const baseAngle = Math.atan2(dy, dx);
 
     // Fire 3 orbs in a spread pattern
-    const spread = 0.25; // radians
+    const spread = 0.40; // radians
     for (let i = -1; i <= 1; i++) {
       const angle = baseAngle + i * spread;
       const vx = Math.cos(angle) * ENEMY.WRAITH_ORB_SPEED;

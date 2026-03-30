@@ -17,6 +17,7 @@ export class PauseMenu {
     this.container = scene.add.container(GAME_WIDTH / 2, GAME_HEIGHT / 2);
     this.container.setScrollFactor(0);
     this.container.setDepth(300);
+    const chromeFont = '"Palatino Linotype", Georgia, serif';
 
     const bg = scene.add.rectangle(0, 0, 720, 480, 0x050d1e, 0.92);
     bg.setStrokeStyle(1.5, 0xffffff, 0.08);
@@ -25,7 +26,7 @@ export class PauseMenu {
     glow.setBlendMode(Phaser.BlendModes.SCREEN);
 
     const title = scene.add.text(0, -180, 'Paused', {
-      fontFamily: 'Georgia, serif',
+      fontFamily: chromeFont,
       fontSize: '40px',
       color: '#fff6dc',
     }).setOrigin(0.5);
@@ -38,7 +39,7 @@ export class PauseMenu {
       'H  =  heavy form   ·   V  =  spirit vision\n' +
       'F12  =  debug overlay',
       {
-        fontFamily: 'Georgia, serif',
+        fontFamily: chromeFont,
         fontSize: '14px',
         color: '#b0c0d0',
         align: 'center',
@@ -48,7 +49,7 @@ export class PauseMenu {
 
     // Volume settings section
     const settingsLabel = scene.add.text(0, 10, '─── Settings ───', {
-      fontFamily: 'Georgia, serif',
+      fontFamily: chromeFont,
       fontSize: '16px',
       color: '#8899aa',
     }).setOrigin(0.5);
@@ -88,7 +89,7 @@ export class PauseMenu {
     }).setOrigin(0.5);
 
     const foot = scene.add.text(0, 195, 'Take a breath. Move on when you are ready.', {
-      fontFamily: 'Georgia, serif',
+      fontFamily: chromeFont,
       fontSize: '14px',
       color: '#607890',
     }).setOrigin(0.5);

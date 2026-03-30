@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { WORLD_RENDER } from '../config';
 
 export interface BossDoorConfig {
   x: number;
@@ -20,12 +21,14 @@ export class BossDoor extends Phaser.GameObjects.Container {
     this.killsRequired = config.killsRequired;
 
     // Door visual — HK boss door sprite
-    this.doorSprite = scene.add.sprite(0, -40, 'hk-boss-door-1');
-    this.doorSprite.setScale(0.8);
+    this.doorSprite = scene.add.sprite(0, 0, 'hk-boss-door-1');
+    this.doorSprite.setOrigin(0.5, 1);
+    this.doorSprite.setScale(WORLD_RENDER.BOSS_DOOR.HEIGHT / this.doorSprite.height);
     this.add(this.doorSprite);
+    const doorHeight = this.doorSprite.displayHeight;
 
     // Pulsing seal glow
-    this.glow = scene.add.ellipse(0, -40, 30, 60, 0xcc4488, 0.15);
+    this.glow = scene.add.ellipse(0, -doorHeight * 0.52, 46, doorHeight * 0.62, 0xcc4488, 0.15);
     this.glow.setBlendMode(Phaser.BlendModes.SCREEN);
     this.add(this.glow);
     scene.tweens.add({
@@ -39,7 +42,7 @@ export class BossDoor extends Phaser.GameObjects.Container {
     });
 
     // Kill counter prompt
-    this.prompt = scene.add.text(0, -90, '', {
+    this.prompt = scene.add.text(0, -doorHeight - 10, '', {
       fontSize: '11px',
       color: '#cc88aa',
       fontFamily: 'monospace',
@@ -52,7 +55,7 @@ export class BossDoor extends Phaser.GameObjects.Container {
     this.setDepth(6);
 
     // Physics zone for blocking player
-    this.zone = scene.add.zone(config.x, config.y - 40, 20, 80);
+    this.zone = scene.add.zone(config.x, config.y - doorHeight / 2, WORLD_RENDER.BOSS_DOOR.BLOCKER_WIDTH, doorHeight);
     scene.physics.add.existing(this.zone, true);
   }
 

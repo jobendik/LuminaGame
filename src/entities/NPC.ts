@@ -30,6 +30,7 @@ export class NPC extends Phaser.GameObjects.Container {
 
   private baseY: number;
   private bobPhase: number;
+  private visualHeight: number;
 
   constructor(scene: Phaser.Scene, config: NPCConfig, index: number) {
     super(scene, config.x, config.y);
@@ -41,23 +42,25 @@ export class NPC extends Phaser.GameObjects.Container {
     this.getLinesFn = config.getLines;
     this.baseY = config.y;
     this.bobPhase = index * 0.9;
+    this.visualHeight = 82;
 
     scene.add.existing(this);
     this.setDepth(25);
 
     if (config.spriteKey && scene.textures.exists(config.spriteKey)) {
       // Use real sprite art
-      const sprite = scene.add.image(0, -40, config.spriteKey);
+      const sprite = scene.add.image(0, 0, config.spriteKey);
       sprite.setOrigin(0.5, 1);
-      // Scale to roughly 120px tall for good visibility
-      const targetHeight = 120;
+      // Normalize imported NPC art to a stable world height.
+      const targetHeight = 108;
       sprite.setScale(targetHeight / sprite.height);
+      this.visualHeight = sprite.displayHeight;
       this.add(sprite);
 
       // Ground shadow
       const shadow = scene.add.graphics();
       shadow.fillStyle(0x000000, 0.18);
-      shadow.fillEllipse(0, 16, 48, 10);
+      shadow.fillEllipse(0, 6, 48, 10);
       this.add(shadow);
     } else {
       // Procedural fallback — draw NPC body
@@ -65,7 +68,9 @@ export class NPC extends Phaser.GameObjects.Container {
     }
 
     // Name tag — position above sprite
-    const nameY = (config.spriteKey && scene.textures.exists(config.spriteKey)) ? -168 : -80;
+    const nameY = (config.spriteKey && scene.textures.exists(config.spriteKey))
+      ? -this.visualHeight - 22
+      : -80;
     const shortName = config.name.split(',')[0];
     const tag = scene.add.text(0, nameY, shortName, {
       fontFamily: 'Georgia, serif',
@@ -75,7 +80,7 @@ export class NPC extends Phaser.GameObjects.Container {
     this.add(tag);
 
     // Aura glow
-    this.aura = scene.add.circle(config.x, config.y - 20, 50, config.colors.glow, 0.08);
+  this.aura = scene.add.circle(config.x, config.y - this.visualHeight * 0.52, 50, config.colors.glow, 0.08);
     this.aura.setBlendMode(Phaser.BlendModes.SCREEN);
     this.aura.setDepth(24);
     scene.tweens.add({
@@ -89,7 +94,7 @@ export class NPC extends Phaser.GameObjects.Container {
     });
 
     // Prompt bubble (E to talk)
-    this.promptBubble = scene.add.container(config.x, config.y - 90);
+    this.promptBubble = scene.add.container(config.x, config.y - this.visualHeight - 18);
     this.promptBubble.setDepth(60);
     const pb = scene.add.rectangle(0, 0, 100, 32, 0x0a1230, 0.85);
     pb.setStrokeStyle(1, 0xffffff, 0.08);
@@ -115,8 +120,10 @@ export class NPC extends Phaser.GameObjects.Container {
     const sway = Math.sin(time * 0.0013 + this.bobPhase * 1.6) * 1.5;
     this.y = this.baseY + bob;
     this.x += (sway - (this.x - this.aura.x)) * 0.06;
-    this.aura.y = this.baseY - 20 + bob;
-    this.promptBubble.y = this.baseY - 90 + bob;
+    this.aura.x = this.x;
+    this.aura.y = this.baseY - this.visualHeight * 0.52 + bob;
+    this.promptBubble.x = this.x;
+    this.promptBubble.y = this.baseY - this.visualHeight - 18 + bob;
   }
 
   private _nearPlayer = false;

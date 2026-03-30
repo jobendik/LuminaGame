@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { ENEMY } from '../config';
+import { ENEMY, WORLD_RENDER } from '../config';
 import { REGIONS } from '../data/regions';
 
 const WORLD_WIDTH = 3840;
@@ -45,8 +45,15 @@ export class Crawler extends Phaser.Physics.Arcade.Sprite {
     scene.physics.add.existing(this);
 
     const body = this.body as Phaser.Physics.Arcade.Body;
-    body.setSize(28, 18);
-    body.setOffset(6, 14);
+    this.setScale(WORLD_RENDER.CRAWLER.HEIGHT / this.height);
+    body.setSize(
+      this.width * WORLD_RENDER.CRAWLER.BODY_WIDTH_RATIO,
+      this.height * WORLD_RENDER.CRAWLER.BODY_HEIGHT_RATIO,
+    );
+    body.setOffset(
+      this.width * WORLD_RENDER.CRAWLER.BODY_OFFSET_X_RATIO,
+      this.height * WORLD_RENDER.CRAWLER.BODY_OFFSET_Y_RATIO,
+    );
     body.setAllowGravity(true);
     body.setBounce(0);
 

@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { WORLD_RENDER } from '../config';
 
 export interface BenchConfig {
   x: number;
@@ -17,12 +18,15 @@ export class RestBench extends Phaser.GameObjects.Container {
     scene.add.existing(this);
 
     // Bench visual — HK bench sprite
-    const benchSprite = scene.add.image(0, -8, 'hk-bench');
-    benchSprite.setScale(0.5);
+    const benchSprite = scene.add.image(0, 0, 'hk-bench');
+    benchSprite.setOrigin(0.5, 1);
+    benchSprite.setScale(WORLD_RENDER.BENCH.HEIGHT / benchSprite.height);
     this.add(benchSprite);
+    const benchHeight = benchSprite.displayHeight;
+    const benchWidth = benchSprite.displayWidth;
 
     // Gentle glow
-    const glow = scene.add.ellipse(0, -4, 50, 30, 0x8866cc, 0.06);
+    const glow = scene.add.ellipse(0, -benchHeight * 0.2, benchWidth * 0.8, benchHeight * 0.45, 0x8866cc, 0.06);
     glow.setBlendMode(Phaser.BlendModes.SCREEN);
     this.add(glow);
     scene.tweens.add({
@@ -34,7 +38,7 @@ export class RestBench extends Phaser.GameObjects.Container {
       ease: 'Sine.easeInOut',
     });
 
-    this.prompt = scene.add.text(0, -28, 'Hold E: Rest', {
+    this.prompt = scene.add.text(0, -benchHeight - 8, 'Hold E: Rest', {
       fontSize: '12px',
       color: '#ccbbdd',
       fontFamily: 'monospace',
@@ -43,8 +47,8 @@ export class RestBench extends Phaser.GameObjects.Container {
     this.prompt.setAlpha(0);
     this.add(this.prompt);
 
-    this.setDepth(5);
-    this.setSize(48, 24);
+    this.setDepth(6);
+    this.setSize(benchWidth * WORLD_RENDER.BENCH.FOOTPRINT_WIDTH_RATIO, 24);
   }
 
   showPrompt(): void {

@@ -2,8 +2,8 @@ import { NPCConfig } from '../entities/NPC';
 
 export const NPC_CONFIGS: NPCConfig[] = [
   {
-    x: 400,
-    y: 582,
+    x: 800,
+    y: 688,
     name: 'Eira, Stardust Librarian',
     colors: { skin: 0xf5d6c0, robe: 0x3b5998, hair: 0xc9a468, glow: 0x88aaee },
     spriteKey: 'npc1-sprite',
@@ -19,8 +19,8 @@ export const NPC_CONFIGS: NPCConfig[] = [
     ],
   },
   {
-    x: 1500,
-    y: 582,
+    x: 4600,
+    y: 688,
     name: 'Milo, Cartographer',
     colors: { skin: 0xe8c8a0, robe: 0x6b4e37, hair: 0x5c3a1e, glow: 0xddaa66 },
     spriteKey: 'npc3-sprite',
@@ -36,8 +36,8 @@ export const NPC_CONFIGS: NPCConfig[] = [
     ],
   },
   {
-    x: 3300,
-    y: 582,
+    x: 10000,
+    y: 688,
     name: 'Veyra, Guardian of the Silent Portal',
     colors: { skin: 0xd4c0e0, robe: 0x4a3060, hair: 0x9070b0, glow: 0xbb88dd },
     spriteKey: 'npc2-sprite',

@@ -29,13 +29,14 @@ export class CameraSystem {
   /** Quick zoom pulse — subtle camera "punch" */
   zoomPulse(amount = 0.02, duration = 200): void {
     const cam = this.scene.cameras.main;
-    const baseZoom = cam.zoom;
+    this.scene.tweens.killTweensOf(cam);
     this.scene.tweens.add({
       targets: cam,
-      zoom: baseZoom + amount,
+      zoom: 1 + amount,
       duration: duration / 2,
       yoyo: true,
       ease: 'Sine.easeOut',
+      onComplete: () => { cam.zoom = 1; },
     });
   }
 

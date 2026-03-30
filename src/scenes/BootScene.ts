@@ -8,7 +8,6 @@ export class BootScene extends Phaser.Scene {
   }
 
   preload(): void {
-    this.createLoadingBar();
     this.generatePlaceholderAssets();
 
     // Load parallax background layers (Scene 1 — blue forest)
@@ -21,8 +20,14 @@ export class BootScene extends Phaser.Scene {
       this.load.image(layer.key, layer.file);
     }
 
+    // Load menu background image
+    this.load.image('menu-bg', 'images/menu_bg.webp');
+
+    // Menu video is loaded directly in MainMenuScene via loadURL() for reliable autoplay
+
     // Load audio
     this.load.audio(ASSET_KEYS.MUSIC_AMBIENT, 'audio/Beyond_the_Winding_Ridge.mp3');
+    this.load.audio(ASSET_KEYS.MUSIC_LEVEL1, 'audio/Where_Tides_Hold_Still.mp3');
     this.load.audio(ASSET_KEYS.MUSIC_DAWN, 'audio/Beneath_the_Damp_Stone.mp3');
 
     // Load real SFX (keys match procedural names so they take priority)
@@ -129,26 +134,6 @@ export class BootScene extends Phaser.Scene {
     this.generateMeteorTexture();
     this.createHKAnimations();
     this.scene.start('MainMenuScene');
-  }
-
-  private createLoadingBar(): void {
-    const width = GAME_WIDTH * 0.5;
-    const height = 20;
-    const x = (GAME_WIDTH - width) / 2;
-    const y = GAME_HEIGHT / 2;
-
-    const bg = this.add.rectangle(x + width / 2, y, width, height, 0x222233);
-    const bar = this.add.rectangle(x + 2, y, 0, height - 4, 0x6688cc);
-    bar.setOrigin(0, 0.5);
-
-    this.load.on('progress', (value: number) => {
-      bar.width = (width - 4) * value;
-    });
-
-    this.load.on('complete', () => {
-      bg.destroy();
-      bar.destroy();
-    });
   }
 
   private generatePlaceholderAssets(): void {

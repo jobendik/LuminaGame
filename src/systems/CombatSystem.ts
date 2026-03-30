@@ -9,6 +9,7 @@ export class CombatSystem {
   private damageLocked = false;
   private isRespawning = false;
   private hitFreezeTimer = 0;
+  private _invincible = false;
   private getSpawnPoint: () => { x: number; y: number };
 
   // Blast charges
@@ -73,6 +74,10 @@ export class CombatSystem {
     this.scene.events.emit('player-damaged', this._health, this._maxHealth, 'heal');
   }
 
+  setInvincible(value: boolean): void {
+    this._invincible = value;
+  }
+
   setPlayer(player: Phaser.Physics.Arcade.Sprite): void {
     this.player = player;
   }
@@ -84,7 +89,7 @@ export class CombatSystem {
   }
 
   damagePlayer(amount: number, sourceX: number, sourceY: number, reason: string): void {
-    if (this.damageLocked || this.isRespawning || !this.player) return;
+    if (this.damageLocked || this.isRespawning || this._invincible || !this.player) return;
 
     this._health = Math.max(0, this._health - amount);
     this.damageLocked = true;

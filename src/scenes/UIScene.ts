@@ -46,14 +46,33 @@ export class UIScene extends Phaser.Scene {
   }
 
   create(): void {
+    const chromeFont = '"Palatino Linotype", Georgia, serif';
+
     // Region name — fades in then out
     this.regionText = this.add.text(GAME_WIDTH / 2, 40, 'Silent Plains', {
       fontSize: '22px',
-      fontFamily: 'Georgia, serif',
+      fontFamily: chromeFont,
       color: '#88aadd',
     });
     this.regionText.setOrigin(0.5);
     this.regionText.setAlpha(0);
+    this.regionText.setStroke('#081120', 4);
+
+    const topLeftPanel = this.add.rectangle(118, 44, 210, 62, 0x091224, 0.72);
+    topLeftPanel.setOrigin(0.5);
+    topLeftPanel.setStrokeStyle(1, 0xb8d7f0, 0.1);
+
+    const topRightPanel = this.add.rectangle(GAME_WIDTH - 92, 30, 132, 30, 0x091224, 0.72);
+    topRightPanel.setOrigin(0.5);
+    topRightPanel.setStrokeStyle(1, 0xb8d7f0, 0.1);
+
+    const bottomRightPanel = this.add.rectangle(GAME_WIDTH - 94, GAME_HEIGHT - 30, 148, 42, 0x091224, 0.72);
+    bottomRightPanel.setOrigin(0.5);
+    bottomRightPanel.setStrokeStyle(1, 0xb8d7f0, 0.1);
+
+    const controlsPanel = this.add.rectangle(150, GAME_HEIGHT - 34, 268, 48, 0x091224, 0.68);
+    controlsPanel.setOrigin(0.5);
+    controlsPanel.setStrokeStyle(1, 0xb8d7f0, 0.08);
 
     // Fade in the region name, hold, then fade out
     this.tweens.add({
@@ -68,7 +87,7 @@ export class UIScene extends Phaser.Scene {
     // Fragment counter (top-right, starts hidden)
     this.fragmentText = this.add.text(GAME_WIDTH - 30, 30, '', {
       fontSize: '16px',
-      fontFamily: 'Georgia, serif',
+      fontFamily: chromeFont,
       color: '#aaccff',
     });
     this.fragmentText.setOrigin(1, 0.5);
@@ -78,7 +97,7 @@ export class UIScene extends Phaser.Scene {
     const hearts = '♥'.repeat(COMBAT.MAX_HEALTH);
     this.healthText = this.add.text(20, 20, hearts, {
       fontSize: '20px',
-      fontFamily: 'Georgia, serif',
+      fontFamily: chromeFont,
       color: '#ff6666',
     });
     this.healthText.setOrigin(0, 0.5);
@@ -87,7 +106,7 @@ export class UIScene extends Phaser.Scene {
     // Quest objective tracker (below health)
     this.questText = this.add.text(20, 44, '', {
       fontSize: '13px',
-      fontFamily: 'Georgia, serif',
+      fontFamily: chromeFont,
       color: '#c0d8f0',
     });
     this.questText.setOrigin(0, 0.5);
@@ -96,7 +115,7 @@ export class UIScene extends Phaser.Scene {
     // Dash cooldown indicator (bottom-right)
     this.dashIndicator = this.add.text(GAME_WIDTH - 20, GAME_HEIGHT - 20, 'DASH ●', {
       fontSize: '13px',
-      fontFamily: 'Georgia, serif',
+      fontFamily: chromeFont,
       color: '#80eea0',
     });
     this.dashIndicator.setOrigin(1, 1);
@@ -105,7 +124,7 @@ export class UIScene extends Phaser.Scene {
     // Blast charge indicator (above dash indicator)
     this.blastIndicator = this.add.text(GAME_WIDTH - 20, GAME_HEIGHT - 38, 'BLAST ●●●', {
       fontSize: '13px',
-      fontFamily: 'Georgia, serif',
+      fontFamily: chromeFont,
       color: '#88bbff',
     });
     this.blastIndicator.setOrigin(1, 1);
@@ -114,7 +133,7 @@ export class UIScene extends Phaser.Scene {
     // Combo display (center-upper, starts hidden)
     this.comboText = this.add.text(GAME_WIDTH / 2, 90, '', {
       fontSize: '18px',
-      fontFamily: 'Georgia, serif',
+      fontFamily: chromeFont,
       color: '#ffd080',
     });
     this.comboText.setOrigin(0.5);
@@ -122,24 +141,21 @@ export class UIScene extends Phaser.Scene {
 
     // Dash cooldown arc bar (next to dash indicator)
     this.dashCooldownBar = this.add.graphics();
-    this.dashCooldownBar.setDepth(1);
+    this.dashCooldownBar.setDepth(2);
 
     // Ability keybindings (bottom-left)
     const controls = [
-      'W / ↑ : Jump',
-      'A/D / ←/→ : Move',
-      'SHIFT : Dash',
-      'SPACE : Glide (hold in air)',
-      'J : Attack',
-      'K : Blast',
+      'Move A/D or ←/→   Jump W or ↑   Dash Shift',
+      'Glide Space   Attack J   Blast K   Interact E',
     ];
-    const controlsText = this.add.text(20, GAME_HEIGHT - 20, controls.join('   |   '), {
+    const controlsText = this.add.text(20, GAME_HEIGHT - 22, controls.join('\n'), {
       fontSize: '11px',
-      fontFamily: 'Arial, sans-serif',
-      color: '#445566',
+      fontFamily: chromeFont,
+      color: '#8ea7be',
+      lineSpacing: 4,
     });
     controlsText.setOrigin(0, 1);
-    controlsText.setAlpha(0.4);
+    controlsText.setAlpha(0.72);
 
     // Fade out controls after a few seconds
     this.tweens.add({
@@ -300,7 +316,7 @@ export class UIScene extends Phaser.Scene {
 
     this.bossNameText = this.add.text(0, -18, 'THE NIGHTMAW', {
       fontSize: '12px',
-      fontFamily: 'Georgia, serif',
+      fontFamily: chromeFont,
       color: '#cc8899',
       letterSpacing: 4,
     }).setOrigin(0.5);
@@ -564,6 +580,7 @@ export class UIScene extends Phaser.Scene {
       fontSize: '14px',
       color: '#6aa0c8',
     });
+    continueText.setOrigin(1, 0.5);
 
     container.add([
       outerFrame, portraitBg, portraitGraphics, separator,

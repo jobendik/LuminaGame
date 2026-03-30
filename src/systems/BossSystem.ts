@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_HEIGHT, ENEMY } from '../config';
+import { GAME_HEIGHT, ENEMY, WORLD_RENDER } from '../config';
 
 const BOSS = {
   // Health & Armor
@@ -67,6 +67,7 @@ export class BossSystem {
   private nextShotAt = 0;
   private stormActive = false;
   private _dead = false;
+  private baseScale = 1;
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
@@ -82,7 +83,8 @@ export class BossSystem {
     this.glow.setDepth(52).setBlendMode(Phaser.BlendModes.SCREEN);
 
     this.sprite = this.scene.add.sprite(-900, GAME_HEIGHT - 142, 'hk-boss-idle-1');
-    this.sprite.setDepth(53).setAlpha(0.01).setScale(1.6);
+    this.baseScale = WORLD_RENDER.BOSS.HEIGHT / this.sprite.height;
+    this.sprite.setDepth(53).setAlpha(0.01).setScale(this.baseScale);
     this.sprite.play('hk-boss-idle');
 
     this.bolts = this.scene.physics.add.group({ allowGravity: false, immovable: true });
@@ -173,13 +175,13 @@ export class BossSystem {
 
     switch (newState) {
       case 'idle':
-        this.sprite.setScale(1.6);
+        this.setBossScale(1);
         this.sprite.clearTint();
         this.sprite.play('hk-boss-idle');
         break;
       case 'attack_prep':
         this.attackCount = 0;
-        this.sprite.setScale(1.7);
+        this.setBossScale(1.05);
         this.sprite.setTint(0xff8866);
         this.sprite.play('hk-boss-attack-prep');
         this.scene.events.emit('boss-telegraph');
@@ -187,7 +189,7 @@ export class BossSystem {
         break;
       case 'attack':
         this.meteorSpawned = false;
-        this.sprite.setScale(1.9);
+        this.setBossScale(1.12);
         this.sprite.setTint(0xff4444);
         this.sprite.play('hk-boss-attack');
         break;
@@ -198,13 +200,13 @@ export class BossSystem {
         this.scene.events.emit('play-sfx', 'sfx-boss-jump', 0.3);
         break;
       case 'land':
-        this.sprite.setScale(1.8);
+        this.setBossScale(1.08);
         this.sprite.play('hk-boss-land');
         this.scene.events.emit('boss-land', this.sprite.x, this.sprite.y);
         this.scene.events.emit('play-sfx', 'sfx-boss-land', 0.4);
         break;
       case 'stun':
-        this.sprite.setScale(1.5);
+        this.setBossScale(0.94);
         this.sprite.setTint(0x88ccff);
         this.sprite.play('hk-boss-stun');
         this.glow.setScale(2);
@@ -321,8 +323,8 @@ export class BossSystem {
   private updateAttackPrep(time: number, _delta: number, stormWallX: number): void {
     this.followPlayer(time, stormWallX);
     // Pulsing grow effect
-    const pulse = 1.7 + Math.sin(time * 0.02) * 0.1;
-    this.sprite.setScale(pulse);
+    const pulse = 1.05 + Math.sin(time * 0.02) * 0.06;
+    this.setBossScale(pulse);
     this.glow.alpha = 0.32 + Math.sin(time * 0.03) * 0.1;
     this.glow.setScale(1.25 + Math.sin(time * 0.06) * 0.14);
 
@@ -408,7 +410,8 @@ export class BossSystem {
     this.glow.alpha = Math.max(0, this.glow.alpha - 0.006);
 
     // Scale shrink
-    const s = Phaser.Math.Linear(this.sprite.scaleX, 0.4, 0.003);
+    const minScale = this.baseScale * WORLD_RENDER.BOSS.DEATH_MIN_SCALE_MULTIPLIER;
+    const s = Phaser.Math.Linear(this.sprite.scaleX, minScale, 0.003);
     this.sprite.setScale(s);
 
     // Emit periodic burst particles
@@ -459,7 +462,7 @@ export class BossSystem {
 
   private spawnGhost(): void {
     const ghost = this.scene.add.sprite(this.sprite.x, this.sprite.y, 'hk-boss-ghost-1');
-    ghost.setDepth(55).setAlpha(0.6).setScale(1.8).setTint(0xccaaff);
+    ghost.setDepth(55).setAlpha(0.6).setScale(this.baseScale * WORLD_RENDER.BOSS.GHOST_SCALE_MULTIPLIER).setTint(0xccaaff);
     ghost.play('hk-boss-ghost-die');
 
     const dir = this.sprite.x < this.player.x ? -1 : 1;
@@ -468,7 +471,7 @@ export class BossSystem {
       x: ghost.x + dir * BOSS.GHOST_SPEED,
       y: ghost.y - 80,
       alpha: 0,
-      scale: 2.2,
+      scale: this.baseScale * 1.35,
       duration: BOSS.GHOST_DURATION,
       ease: 'Quad.easeOut',
       onComplete: () => ghost.destroy(),
@@ -519,5 +522,9 @@ export class BossSystem {
         this.transitionTo('stun');
       }
     }
+  }
+
+  private setBossScale(multiplier: number): void {
+    this.sprite.setScale(this.baseScale * multiplier);
   }
 }

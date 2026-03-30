@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { ASSET_KEYS } from '../config';
+import { ASSET_KEYS, WORLD_RENDER } from '../config';
 
 export interface MovingPlatformConfig {
   x: number;
@@ -28,9 +28,13 @@ export class MovingPlatform extends Phaser.Physics.Arcade.Sprite {
   private readonly CRUMBLE_FALL_DELAY = 300;
   private readonly RESPAWN_DELAY = 3000;
   private shakeOffset = 0;
+  private baseDisplayHeight = WORLD_RENDER.PLATFORM.HEIGHT;
 
   constructor(scene: Phaser.Scene, config: MovingPlatformConfig) {
-    super(scene, config.x, config.y, ASSET_KEYS.PLATFORM);
+    const textureKey = scene.textures.exists(WORLD_RENDER.PLATFORM.REAL_TEXTURE_KEY)
+      ? WORLD_RENDER.PLATFORM.REAL_TEXTURE_KEY
+      : ASSET_KEYS.PLATFORM;
+    super(scene, config.x, config.y, textureKey);
 
     this.platformType = config.type;
     this.startX = config.x;
@@ -46,8 +50,12 @@ export class MovingPlatform extends Phaser.Physics.Arcade.Sprite {
     body.setImmovable(true);
     body.setAllowGravity(false);
 
-    if (config.scaleX) this.setScale(config.scaleX, 1);
-    this.setDepth(3);
+    this.setDisplaySize(
+      WORLD_RENDER.PLATFORM.WIDTH * (config.scaleX ?? 1),
+      WORLD_RENDER.PLATFORM.HEIGHT,
+    );
+    this.setDepth(4);
+    body.updateFromGameObject();
 
     // Visual distinction for crumbling platforms
     if (this.platformType === 'crumbling') {
@@ -130,7 +138,7 @@ export class MovingPlatform extends Phaser.Physics.Arcade.Sprite {
     else if (this.crumbleTimer < this.CRUMBLE_DELAY + this.CRUMBLE_FALL_DELAY) {
       const fallProgress = (this.crumbleTimer - this.CRUMBLE_DELAY) / this.CRUMBLE_FALL_DELAY;
       this.setAlpha(1 - fallProgress);
-      this.y = this.startY + fallProgress * 60;
+      this.y = this.startY + fallProgress * (this.baseDisplayHeight * 1.8);
       body.updateFromGameObject();
     }
     // Disable
